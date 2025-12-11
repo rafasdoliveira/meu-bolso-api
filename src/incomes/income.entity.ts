@@ -9,7 +9,7 @@ export class Income {
   user_id: number;
 
   @Column({ type: 'date' })
-  data: string;
+  date: string;
 
   @Column()
   source_id: number;
@@ -21,8 +21,8 @@ export class Income {
   notes?: string;
 
   @Column({ type: 'int' })
-  payment_type: number;
+  payment_type_id: number;
 
   @Column({ type: 'int' })
-  status: number;
+  status_id: number;
 }

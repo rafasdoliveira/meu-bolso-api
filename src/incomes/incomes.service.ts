@@ -17,7 +17,21 @@ export class IncomeService {
   ) {}
 
   async findAllPaginated(page = 1, size = 10) {
-    return this.paginationService.paginate(this.incomeRepository, page, size);
+    const validPage = page > 0 ? page : 1;
+    const validSize = size > 0 ? size : 10;
+
+    const [data, total] = await this.incomeRepository.findAndCount({
+      skip: (validPage - 1) * validSize,
+      take: validSize,
+    });
+
+    return {
+      page: validPage,
+      size: validSize,
+      total,
+      totalPages: Math.ceil(total / validSize),
+      data,
+    };
   }
 
   async createIncome(dto: CreateIncomeDto): Promise<Income> {

@@ -1,8 +1,9 @@
 import { Module } from '@nestjs/common';
+import { ConfigModule } from '@nestjs/config';
+import { TypeOrmModule } from '@nestjs/typeorm';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
-import { TypeOrmModule } from '@nestjs/typeorm';
-import { ConfigModule } from '@nestjs/config';
+import { Income } from './incomes/income.entity';
 import { IncomesModule } from './incomes/incomes.module';
 import { PaginationModule } from './pagination/pagination.module';
 
@@ -18,8 +19,9 @@ import { PaginationModule } from './pagination/pagination.module';
       username: process.env.DB_USERNAME,
       password: process.env.DB_PASSWORD,
       database: process.env.DB_NAME,
-      entities: [__dirname + '/**/*.entity{.ts,.js}'],
+      entities: [Income],
       synchronize: true,
+      // dropSchema: true,
     }),
     IncomesModule,
     PaginationModule,
