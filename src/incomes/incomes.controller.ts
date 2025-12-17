@@ -1,17 +1,18 @@
 import { Body, Controller, Get, Post, Query } from '@nestjs/common';
-import { IncomeService } from './incomes.service';
 import { CreateIncomeDto } from './dto/create-income.dto';
-import { Income } from './income.entity';
+import { IncomeQueryDto } from './dto/income-query.dto';
+import { Income } from './entities/income.entity';
+import { IncomeService } from './incomes.service';
 
 @Controller('incomes')
 export class IncomeController {
   constructor(private readonly incomeService: IncomeService) {}
 
   @Get()
-  findAll(@Query('page') page = 1, @Query('size') size = 10) {
-    const pageNumber = Number(page);
-    const pageSize = Number(size);
-    return this.incomeService.findAllPaginated(pageNumber, pageSize);
+  findAll(@Query() query: IncomeQueryDto) {
+    const { page, size, year, month } = query;
+
+    return this.incomeService.findAllPaginated(page, size, year, month);
   }
 
   @Post()

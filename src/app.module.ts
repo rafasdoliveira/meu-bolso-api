@@ -3,9 +3,13 @@ import { ConfigModule } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
-import { Income } from './incomes/income.entity';
+import { IncomeStatus } from './incomes/entities/income-status.entity';
+import { Income } from './incomes/entities/income.entity';
+import { IncomeSources } from './sources/entities/sources.entity';
 import { IncomesModule } from './incomes/incomes.module';
 import { PaginationModule } from './pagination/pagination.module';
+import { PaymentTypes } from './payment-types/payment_types.entity';
+import { SourcesModule } from './sources/sources.module';
 
 @Module({
   imports: [
@@ -19,11 +23,11 @@ import { PaginationModule } from './pagination/pagination.module';
       username: process.env.DB_USERNAME,
       password: process.env.DB_PASSWORD,
       database: process.env.DB_NAME,
-      entities: [Income],
-      synchronize: true,
-      // dropSchema: true,
+      entities: [Income, PaymentTypes, IncomeStatus, IncomeSources],
+      // synchronize: true,
     }),
     IncomesModule,
+    SourcesModule,
     PaginationModule,
   ],
   controllers: [AppController],

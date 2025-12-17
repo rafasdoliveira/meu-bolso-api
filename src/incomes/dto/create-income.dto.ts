@@ -17,7 +17,7 @@ export class CreateIncomeDto {
         'O campo Data é obrigatório e deve ser uma data válida (YYYY-MM-DD)',
     },
   )
-  data: string;
+  date: string;
 
   @IsInt({
     message: 'O campo Fonte de Renda é obrigatório e deve ser um número',
@@ -32,8 +32,8 @@ export class CreateIncomeDto {
   notes?: string;
 
   @IsInt({ message: 'O campo Tipo de Pagamento é obrigatório' })
-  payment_type: number;
+  payment_type_id: number;
 
   @IsInt({ message: 'O campo Status é obrigatório' })
-  status: number;
+  status_id: number;
 }
