@@ -1,13 +1,10 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { PaymentTypes } from 'src/payment-types/payment_types.entity';
 import { formatDateToBR } from 'src/utils/formatDateToBR';
 import { Between, Repository } from 'typeorm';
 import { CreateIncomeDto } from './dto/create-income.dto';
 import { IncomeResponseDto } from './dto/income-response.dto';
-import { IncomeStatus } from './entities/income-status.entity';
 import { Income } from './entities/income.entity';
-import { IncomeSources } from '../sources/entities/sources.entity';
 
 @Injectable()
 export class IncomeService {
@@ -68,9 +65,9 @@ export class IncomeService {
       date: new Date(dto.date),
       amount: dto.amount,
       notes: dto.notes,
-      incomeSources: { id: dto.source_id } as IncomeSources,
-      paymentType: { id: dto.payment_type_id } as PaymentTypes,
-      incomeStatus: { id: dto.status_id } as IncomeStatus,
+      incomeSources: { id: dto.source_id },
+      paymentType: { id: dto.payment_type_id },
+      incomeStatus: { id: dto.status_id },
     });
 
     return this.incomeRepository.save(income);

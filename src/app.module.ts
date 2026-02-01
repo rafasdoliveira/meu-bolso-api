@@ -5,10 +5,11 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { IncomeStatus } from './incomes/entities/income-status.entity';
 import { Income } from './incomes/entities/income.entity';
-import { IncomeSources } from './sources/entities/sources.entity';
 import { IncomesModule } from './incomes/incomes.module';
 import { PaginationModule } from './pagination/pagination.module';
+import { PaymentTypesModule } from './payment-types/payment-types.module';
 import { PaymentTypes } from './payment-types/payment_types.entity';
+import { IncomeSources } from './sources/entities/sources.entity';
 import { SourcesModule } from './sources/sources.module';
 
 @Module({
@@ -29,6 +30,7 @@ import { SourcesModule } from './sources/sources.module';
     IncomesModule,
     SourcesModule,
     PaginationModule,
+    PaymentTypesModule,
   ],
   controllers: [AppController],
   providers: [AppService],

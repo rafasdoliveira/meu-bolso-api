@@ -7,6 +7,8 @@ import { Income } from './entities/income.entity';
 import { IncomeSources } from '../sources/entities/sources.entity';
 import { IncomeController } from './incomes.controller';
 import { IncomeService } from './incomes.service';
+import { IncomeStatusController } from './income-status.controller';
+import { IncomeStatusService } from './income-status.service';
 
 @Module({
   imports: [
@@ -18,7 +20,7 @@ import { IncomeService } from './incomes.service';
     ]),
     PaginationModule,
   ],
-  providers: [IncomeService],
-  controllers: [IncomeController],
+  providers: [IncomeService, IncomeStatusService],
+  controllers: [IncomeController, IncomeStatusController],
 })
 export class IncomesModule {}
