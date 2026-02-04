@@ -60,9 +60,11 @@ export class IncomeService {
   }
 
   async createIncome(dto: CreateIncomeDto): Promise<Income> {
+    const [year, month, day] = dto.date.split('-').map(Number);
+
     const income = this.incomeRepository.create({
       user_id: dto.user_id,
-      date: new Date(dto.date),
+      date: new Date(year, month - 1, day),
       amount: dto.amount,
       notes: dto.notes,
       incomeSources: { id: dto.source_id },
@@ -70,6 +72,15 @@ export class IncomeService {
       incomeStatus: { id: dto.status_id },
     });
 
-    return this.incomeRepository.save(income);
+    const savedIncome = await this.incomeRepository.save(income);
+
+    return this.incomeRepository.findOneOrFail({
+      where: { id: savedIncome.id },
+      relations: {
+        incomeSources: true,
+        paymentType: true,
+        incomeStatus: true,
+      },
+    });
   }
 }
