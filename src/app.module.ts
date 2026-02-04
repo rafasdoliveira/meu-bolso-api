@@ -1,10 +1,16 @@
 import { Module } from '@nestjs/common';
+import { ConfigModule } from '@nestjs/config';
+import { TypeOrmModule } from '@nestjs/typeorm';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
-import { TypeOrmModule } from '@nestjs/typeorm';
-import { ConfigModule } from '@nestjs/config';
+import { IncomeStatus } from './incomes/entities/income-status.entity';
+import { Income } from './incomes/entities/income.entity';
 import { IncomesModule } from './incomes/incomes.module';
 import { PaginationModule } from './pagination/pagination.module';
+import { PaymentTypesModule } from './payment-types/payment-types.module';
+import { PaymentTypes } from './payment-types/payment_types.entity';
+import { IncomeSources } from './sources/entities/sources.entity';
+import { SourcesModule } from './sources/sources.module';
 
 @Module({
   imports: [
@@ -18,11 +24,13 @@ import { PaginationModule } from './pagination/pagination.module';
       username: process.env.DB_USERNAME,
       password: process.env.DB_PASSWORD,
       database: process.env.DB_NAME,
-      entities: [__dirname + '/**/*.entity{.ts,.js}'],
-      synchronize: true,
+      entities: [Income, PaymentTypes, IncomeStatus, IncomeSources],
+      // synchronize: true,
     }),
     IncomesModule,
+    SourcesModule,
     PaginationModule,
+    PaymentTypesModule,
   ],
   controllers: [AppController],
   providers: [AppService],
