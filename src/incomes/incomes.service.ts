@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { formatDateToBR } from 'src/utils/formatDateToBR';
+import { formatDateToBR } from '../utils/formatDateToBR';
 import { Between, Repository } from 'typeorm';
 import { CreateIncomeDto } from './dto/create-income.dto';
 import { IncomeResponseDto } from './dto/income-response.dto';

@@ -1,0 +1,25 @@
+services:
+  db:
+    image: postgres:15
+    container_name: meu-bolso-db
+    environment:
+      POSTGRES_DB: meu-bolso-db
+      POSTGRES_USER: rafasdoliveira
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
+  api:
+    image: meu-bolso-api:v20260204221000
+    container_name: meu-bolso-api
+    ports:
+      - "8080:8080"
+    env_file:
+      - .env
+    depends_on:
+      - db
+
+volumes:
+  pgdata:
