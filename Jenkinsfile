@@ -4,7 +4,8 @@ pipeline {
   environment {
     REGISTRY_IMAGE = "meu-bolso-api"
     SONAR_PROJECT_KEY = "meu-bolso-api"
-    SONAR_HOST_URL = "http://sonarqube:9000"
+    // SONAR_HOST_URL = "http://sonarqube:9000"
+    SONAR_HOST_URL = "http://localhost:9000"
   }
 
   stages {
@@ -34,19 +35,22 @@ pipeline {
     }
 
     stage('SonarQube Scan') {
-      steps {
-        withSonarQubeEnv('sonar') {
-          sh """
-            sonar-scanner \
-              -Dsonar.projectKey=$SONAR_PROJECT_KEY \
-              -Dsonar.sources=src \
-              -Dsonar.tests=src \
-              -Dsonar.javascript.lcov.reportPaths=coverage/lcov.info \
-              -Dsonar.host.url=$SONAR_HOST_URL
-          """
-        }
-      }
-    }
+  environment {
+    SONAR_TOKEN = credentials('sonar-token')
+  }
+  steps {
+    sh '''
+      npx sonar-scanner \
+        -Dsonar.projectKey=meu-bolso-api \
+        -Dsonar.sources=src \
+        -Dsonar.tests=src \
+        -Dsonar.javascript.lcov.reportPaths=coverage/lcov.info \
+        -Dsonar.host.url=http://localhost:9000 \
+        -Dsonar.login=$SONAR_TOKEN
+    '''
+  }
+}
+
 
     stage('Quality Gate') {
       steps {
