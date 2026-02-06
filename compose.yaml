@@ -1,5 +1,3 @@
-version: "3.9"
-
 services:
   db:
     image: postgres:15
@@ -14,16 +12,25 @@ services:
       - pgdata:/var/lib/postgresql/data
     networks:
       - meu-bolso-net
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U rafasdoliveira -d meu-bolso-db"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
 
   api:
+    build: .
     image: meu-bolso-api:v1.0.0
     container_name: meu-bolso-api
     ports:
       - "8080:8080"
     env_file:
       - .env
+    environment:
+      - DB_HOST=db
     depends_on:
-      - db
+      db:
+          condition: service_healthy
     networks:
       - meu-bolso-net
 
@@ -36,8 +43,12 @@ services:
       - meu-bolso-net
 
   jenkins:
+    build: 
+      context: ./jenkins
+      dockerfile: Dockerfile
     image: jenkins-custom
     container_name: jenkins
+    user: root
     ports:
       - "8081:8080"
       - "50000:50000"
