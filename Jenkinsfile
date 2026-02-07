@@ -89,7 +89,7 @@ pipeline {
     stage('Create Git Tag') {
       when {
         allOf {
-          branch 'main'
+          branch 'configArt'
           not { changeRequest() }
         }
       }
