@@ -2,13 +2,12 @@ pipeline {
   agent any
 
   environment {
-    REGISTRY_IMAGE = "meu-bolso-api"
-    SONAR_PROJECT_KEY = "meu-bolso-api"
-    SONAR_HOST_URL = "http://sonarqube:9000"
+    REGISTRY_IMAGE = 'meu-bolso-api'
+    SONAR_PROJECT_KEY = 'meu-bolso-api'
+    SONAR_HOST_URL = 'http://sonarqube:9000'
   }
 
   stages {
-
     stage('Checkout') {
       steps {
         checkout scm
@@ -34,24 +33,25 @@ pipeline {
     }
 
     stage('SonarQube Scan') {
-  environment {
-    SONAR_TOKEN = credentials('sonar-token')
-  }
-  steps {
-    sh '''
-      npx sonar-scanner \
-        -Dsonar.projectKey=meu-bolso-api \
-        -Dsonar.sources=src \
-        -Dsonar.tests=src,test \
-        -Dsonar.test.inclusions="src/**/*.spec.ts,test/**/*.e2e-spec.ts" \
-        -Dsonar.exclusions="src/**/*.spec.ts" \
-        -Dsonar.javascript.lcov.reportPaths=coverage/lcov.info \
-        -Dsonar.host.url=http://sonarqube:9000 \
-        -Dsonar.login=$SONAR_TOKEN
-    '''
-  }
-}
-
+      environment {
+        SONAR_TOKEN = credentials('sonar-token')
+      }
+      steps {
+        withSonarQubeEnv('SONAR_LOCAL') {
+          sh '''
+        npx sonar-scanner \
+          -Dsonar.projectKey=meu-bolso-api \
+          -Dsonar.sources=src \
+          -Dsonar.tests=src,test \
+          -Dsonar.test.inclusions="src/**/*.spec.ts,test/**/*.e2e-spec.ts" \
+          -Dsonar.exclusions="src/**/*.spec.ts" \
+          -Dsonar.javascript.lcov.reportPaths=coverage/lcov.info \
+          -Dsonar.host.url=http://sonarqube:9000 \
+          -Dsonar.login=$SONAR_TOKEN
+      '''
+        }
+      }
+    }
 
     stage('Quality Gate') {
       steps {
