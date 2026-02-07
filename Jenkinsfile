@@ -5,7 +5,6 @@ pipeline {
     REGISTRY_IMAGE = "meu-bolso-api"
     SONAR_PROJECT_KEY = "meu-bolso-api"
     SONAR_HOST_URL = "http://sonarqube:9000"
-    //SONAR_HOST_URL = "http://localhost:9000"
   }
 
   stages {
