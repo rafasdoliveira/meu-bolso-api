@@ -8,6 +8,11 @@ pipeline {
         sh 'npm run build'
       }
     }
+    stage('2. Test & Coverage (>= 50%)') {
+      steps {
+        sh 'npm run test:cov'
+      }
+    }
   }
 }
 
