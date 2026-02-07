@@ -43,7 +43,7 @@ pipeline {
         -Dsonar.projectKey=meu-bolso-api \
         -Dsonar.sources=src \
         -Dsonar.tests=src \
-        -Dsonar.test.inclusions="src/**/*.spec.ts" \
+        -Dsonar.test.inclusions="src/**/*.spec.ts,test/**/*.e2e-spec.ts" \
         -Dsonar.exclusions="src/**/*.spec.ts" \
         -Dsonar.javascript.lcov.reportPaths=coverage/lcov.info \
         -Dsonar.host.url=http://sonarqube:9000 \
