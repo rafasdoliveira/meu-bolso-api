@@ -1,9 +1,12 @@
 pipeline {
   agent any
-  stage('1. Build') {
-    steps {
-      sh 'npm ci'
-      sh npm run build
+  
+  stages {
+    stage('1. Build') {
+      steps {
+        sh 'npm ci'
+        sh npm run build
+      }
     }
   }
 }
