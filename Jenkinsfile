@@ -13,6 +13,13 @@ pipeline {
         sh 'npm run test:cov'
       }
     }
+    stage('3. SonarQube') {
+      steps {
+        withSonarQubeEnv('SonarQube') {
+          sh 'npx sonar-scanner'
+        }
+      }
+    }
   }
 }
 
