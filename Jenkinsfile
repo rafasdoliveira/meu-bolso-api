@@ -64,7 +64,13 @@ pipeline {
     stage('Trivy Repo Scan') {
       steps {
         sh '''
-          trivy fs --severity HIGH,CRITICAL --exit-code 1 .
+          trivy fs \
+            --severity HIGH,CRITICAL \
+            --exit-code 1 \
+            --cache-dir /var/jenkins_home/trivy_cache \
+            --skip-version-check \
+            --scanners vuln \
+            .
         '''
       }
     }
