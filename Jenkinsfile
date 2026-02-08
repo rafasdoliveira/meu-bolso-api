@@ -107,7 +107,7 @@ pipeline {
             withCredentials([usernamePassword(credentialsId: 'git-credentials',
                              passwordVariable: 'GIT_PASSWORD',
                              usernameVariable: 'GIT_USERNAME')]) {
-                sh "git push https://${GIT_USERNAME}:${GIT_PASSWORD}@github.com/seu-usuario/back-meubolsoapi.git main --tags"
+                              sh "git push https://${GIT_USERNAME}:${GIT_PASSWORD}@github.com/seu-usuario/back-meubolsoapi.git ${env.BRANCH_NAME} --tags"
                              }
         }
       }
