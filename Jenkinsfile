@@ -1,6 +1,10 @@
 pipeline {
   agent any
 
+  environment {
+    SONAR_TOKEN = credentials('sonar-token')
+  }
+
   stages {
     stage('1. Build') {
       steps {
@@ -15,8 +19,23 @@ pipeline {
     }
     stage('3. SonarQube') {
       steps {
-        withSonarQubeEnv('SonarQube') {
-          sh 'npx sonar-scanner'
+        sh '''
+          npx sonar-scanner \
+            -Dsonar.projectKey=meu-bolso-api \
+            -Dsonar.sources=src \
+            -Dsonar.tests=src,test \
+            -Dsonar.test.inclusions="src/**/*.spec.ts,test/**/*.e2e-spec.ts" \
+            -Dsonar.exclusions="**/dist/**,**/node_modules/**" \
+            -Dsonar.javascript.lcov.reportPaths=coverage/lcov.info \
+            -Dsonar.host.url=http://sonarqube:9000 \
+            -Dsonar.login=$SONAR_TOKEN
+        '''
+      }
+    }
+    stage('4. Quality Gate') {
+      steps {
+        timeout(time: 5, unit: 'MINUTES') {
+          waitForQualityGate abortPipeline: true
         }
       }
     }
