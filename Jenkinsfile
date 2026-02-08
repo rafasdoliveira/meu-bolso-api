@@ -86,6 +86,9 @@ pipeline {
     stage('Trivy Image Scan') {
       steps {
         sh '''
+          # Vulnerabilidades ignoradas temporariamente via .trivyignore
+          # Motivo: Versões seguras já estão no package.json, mas persistem em
+          # dependências transitivas que estão sendo tratadas via overrides.
           trivy image --severity HIGH,CRITICAL --exit-code 1 \
             $REGISTRY_IMAGE:${GIT_COMMIT}
         '''
