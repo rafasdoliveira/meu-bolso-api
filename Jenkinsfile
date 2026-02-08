@@ -1,6 +1,10 @@
 pipeline {
   agent any
-
+  
+  tools {
+    nodejs 'node20'
+  }
+  
   environment {
     REGISTRY_IMAGE = "meu-bolso-api"
     SONAR_PROJECT_KEY = "meu-bolso-api"
