@@ -78,7 +78,7 @@ pipeline {
     stage('Docker Build') {
       steps {
         sh '''
-          docker build -t $REGISTRY_IMAGE:${GIT_COMMIT} .
+          docker build --no-cache -t $REGISTRY_IMAGE:${GIT_COMMIT} .
         '''
       }
     }
