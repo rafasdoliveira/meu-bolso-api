@@ -97,7 +97,7 @@ pipeline {
 
     stage('Create Git Tag') {
       when {
-        branch 'configArt'
+        branch 'main'
       }
       steps {
         script {
