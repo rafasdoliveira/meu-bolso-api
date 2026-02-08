@@ -27,6 +27,7 @@ pipeline {
               -Dsonar.test.inclusions="src/**/*.spec.ts,test/**/*.e2e-spec.ts" \
               -Dsonar.exclusions="src/**/*.spec.ts,src/main.ts,src/migrations/*.ts,src/**/*.dto.ts,src/**/*.entity.ts,src/**/*.module.ts,coverage/**" \
               -Dsonar.javascript.lcov.reportPaths=coverage/lcov.info \
+              -Dsonar.typescript.tsconfigPath=tsconfig.sonar.json \
               -Dsonar.host.url=http://sonarqube:9000 \
               -Dsonar.login=$SONAR_TOKEN
           '''
@@ -35,7 +36,7 @@ pipeline {
     }
     stage('4. Quality Gate') {
       steps {
-        timeout(time: 10, unit: 'MINUTES') {
+        timeout(time: 5, unit: 'MINUTES') {
           waitForQualityGate abortPipeline: true
         }
       }
