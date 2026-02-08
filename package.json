@@ -29,15 +29,20 @@
     "@supabase/supabase-js": "^2.87.1",
     "class-transformer": "^0.5.1",
     "class-validator": "^0.14.3",
-    "cross-spawn": "^7.0.5",
-    "glob": "^11.1.0",
+    "cross-spawn": "7.0.5",
+    "glob": "11.1.0",
     "pg": "^8.16.3",
     "qs": "^6.14.1",
     "reflect-metadata": "^0.2.2",
     "rxjs": "^7.8.1",
     "swagger-ui-express": "^5.0.1",
-    "tar": "^7.5.7",
+    "tar": "7.5.7",
     "typeorm": "^0.3.28"
+  },
+  "overrides": {
+    "cross-spawn": "7.0.5",
+    "glob": "11.1.0",
+    "tar": "7.5.7"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3.2.0",
