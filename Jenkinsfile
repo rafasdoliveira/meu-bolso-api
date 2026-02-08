@@ -97,7 +97,10 @@ pipeline {
 
     stage('Create Git Tag') {
       when {
-        branch 'configArt'
+        anyOf {
+            branch 'main'
+            branch 'configArt'
+        }
       }
       steps {
         script {
