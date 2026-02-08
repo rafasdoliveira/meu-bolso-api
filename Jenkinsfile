@@ -95,25 +95,28 @@ pipeline {
       }
     }
 
-    // stage('Create Git Tag') {
-    //   when {
-    //     anyOf {
-    //         branch 'main'
-    //         branch 'configArt'
-    //     }
-    //   }
-    //   steps {
-    //     script {
-    //         sh 'git config user.email "jenkins@meubolso.com"'
-    //         sh 'git config user.name "Jenkins CI"'
-    //         sh 'npm version patch -m "chore(release): %s [skip ci]"'
-    //         withCredentials([usernamePassword(credentialsId: 'git-credentials',
-    //                          passwordVariable: 'GIT_PASSWORD',
-    //                          usernameVariable: 'GIT_USERNAME')]) {
-    //                           sh "git push https://${GIT_USERNAME}:${GIT_PASSWORD}@github.com/seu-usuario/back-meubolsoapi.git ${env.BRANCH_NAME} --tags"
-    //                          }
-    //     }
-    //   }
-    // }
+    stage('Create Git Tag') {
+      steps {
+        script {
+            def branchName = sh(script: 'git rev-parse --abbrev-ref HEAD', returnStdout: true).trim()
+
+            if (branchName == 'configArt' || branchName == 'main') {
+                echo "Iniciando processo de Tag na branch: ${branchName}"
+
+                sh 'git config user.email "jenkins@meubolso.com"'
+                sh 'git config user.name "Jenkins CI"'
+                sh 'npm version patch -m "chore(release): %s [skip ci]"'
+
+                withCredentials([usernamePassword(credentialsId: 'git-credentials',
+                                 passwordVariable: 'GIT_PASSWORD',
+                                 usernameVariable: 'GIT_USERNAME')]) {
+              sh "git push https://${GIT_USERNAME}:${GIT_PASSWORD}@github.com/rafasdoliveira/meu-bolso-api.git ${branchName} --tags"
+                                 }
+            } else {
+                echo "Estágio pulado: A branch atual (${branchName}) não é permitida para Tags."
+            }
+        }
+      }
+    }
   }
 }

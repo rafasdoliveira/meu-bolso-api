@@ -2,7 +2,8 @@ FROM jenkins/jenkins:lts
 
 USER root
 
-RUN apt-get update && apt-get install -y \
+RUN apt-get update \
+ && apt-get install -y \
     docker.io \
     make \
     build-essential \
@@ -20,7 +21,7 @@ RUN apt-get update && apt-get install -y \
     liblzma-dev \
     tk-dev \
     xz-utils \
- && curl -fsSL https://deb.nodesource.com/setup_18.x | bash - \
+ && curl -fsSL https://deb.nodesource.com/setup_20.x | bash - \
  && apt-get install -y nodejs \
  && npm install -g npm \
  && curl -fsSL -o /usr/local/bin/kubectl https://dl.k8s.io/release/v1.29.3/bin/linux/amd64/kubectl \
@@ -31,4 +32,8 @@ RUN apt-get update && apt-get install -y \
  && apt-get clean \
  && rm -rf /var/lib/apt/lists/*
 
+USER jenkins
+
+USER root
+RUN apt-get update && apt-get install -y docker.io
 USER jenkins
