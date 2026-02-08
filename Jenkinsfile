@@ -1,10 +1,6 @@
 pipeline {
   agent any
 
-  environment {
-    SONAR_TOKEN = credentials('sonar-token')
-  }
-
   stages {
     stage('1. Build') {
       steps {
@@ -12,11 +8,13 @@ pipeline {
         sh 'npm run build'
       }
     }
-    stage('2. Test & Coverage (>= 50%)') {
+
+    stage('2. Test & Coverage') {
       steps {
         sh 'npm run test:cov'
       }
     }
+
     stage('3. SonarQube') {
       steps {
         withSonarQubeEnv('SonarQube') {
@@ -26,7 +24,7 @@ pipeline {
               -Dsonar.sources=src \
               -Dsonar.tests=src,test \
               -Dsonar.test.inclusions="src/**/*.spec.ts,test/**/*.e2e-spec.ts" \
-              -Dsonar.exclusions="**/dist/**,**/node_modules/**" \
+              -Dsonar.exclusions="**/dist/**,**/node_modules/**,coverage/**" \
               -Dsonar.javascript.lcov.reportPaths=coverage/lcov.info
           '''
         }
@@ -35,13 +33,14 @@ pipeline {
 
     stage('4. Quality Gate') {
       steps {
-        timeout(time: 5, unit: 'MINUTES') {
+        timeout(time: 10, unit: 'MINUTES') {
           waitForQualityGate abortPipeline: true
         }
       }
     }
   }
 }
+
 
 // pipeline {
 //   agent any
