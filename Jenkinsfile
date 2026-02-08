@@ -8,30 +8,31 @@ pipeline {
         sh 'npm run build'
       }
     }
-
     stage('2. Test & Coverage') {
       steps {
         sh 'npm run test:cov'
       }
     }
-
-    stage('3. SonarQube') {
+    stage('SonarQube Scan') {
+      environment {
+        SONAR_TOKEN = credentials('sonar-token')
+      }
       steps {
-        withSonarQubeEnv('SonarQube') {
+        withSonarQubeEnv('SONAR_LOCAL') {
           sh '''
             npx sonar-scanner \
               -Dsonar.projectKey=meu-bolso-api \
               -Dsonar.sources=src \
               -Dsonar.tests=src,test \
               -Dsonar.test.inclusions="src/**/*.spec.ts,test/**/*.e2e-spec.ts" \
-              -Dsonar.exclusions="**/dist/**,**/node_modules/**,coverage/**" \
+              -Dsonar.exclusions="src/**/*.spec.ts,src/main.ts,src/migrations/*.ts,src/**/*.dto.ts,src/**/*.entity.ts,src/**/*.module.ts,coverage/**" \
               -Dsonar.javascript.lcov.reportPaths=coverage/lcov.info \
-              -Dsonar.typescript.tsconfigPath=tsconfig.sonar.json
+              -Dsonar.host.url=http://sonarqube:9000 \
+              -Dsonar.login=$SONAR_TOKEN
           '''
         }
       }
     }
-
     stage('4. Quality Gate') {
       steps {
         timeout(time: 10, unit: 'MINUTES') {
