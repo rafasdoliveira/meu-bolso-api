@@ -44,7 +44,7 @@ pipeline {
           -Dsonar.sources=src \
           -Dsonar.tests=src,test \
           -Dsonar.test.inclusions="src/**/*.spec.ts,test/**/*.e2e-spec.ts" \
-          -Dsonar.exclusions="src/**/*.spec.ts" \
+          -Dsonar.exclusions="src/**/*.spec.ts,src/main.ts,src/migrations/*.ts,src/**/*.dto.ts,src/**/*.entity.ts,src/**/*.module.ts,src/coverage/**/*" \
           -Dsonar.javascript.lcov.reportPaths=coverage/lcov.info \
           -Dsonar.host.url=http://sonarqube:9000 \
           -Dsonar.login=$SONAR_TOKEN
