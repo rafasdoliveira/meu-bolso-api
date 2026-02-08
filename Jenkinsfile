@@ -19,19 +19,20 @@ pipeline {
     }
     stage('3. SonarQube') {
       steps {
-        sh '''
-          npx sonar-scanner \
-            -Dsonar.projectKey=meu-bolso-api \
-            -Dsonar.sources=src \
-            -Dsonar.tests=src,test \
-            -Dsonar.test.inclusions="src/**/*.spec.ts,test/**/*.e2e-spec.ts" \
-            -Dsonar.exclusions="**/dist/**,**/node_modules/**" \
-            -Dsonar.javascript.lcov.reportPaths=coverage/lcov.info \
-            -Dsonar.host.url=http://sonarqube:9000 \
-            -Dsonar.login=$SONAR_TOKEN
-        '''
+        withSonarQubeEnv('SonarQube') {
+          sh '''
+            npx sonar-scanner \
+              -Dsonar.projectKey=meu-bolso-api \
+              -Dsonar.sources=src \
+              -Dsonar.tests=src,test \
+              -Dsonar.test.inclusions="src/**/*.spec.ts,test/**/*.e2e-spec.ts" \
+              -Dsonar.exclusions="**/dist/**,**/node_modules/**" \
+              -Dsonar.javascript.lcov.reportPaths=coverage/lcov.info
+          '''
+        }
       }
     }
+
     stage('4. Quality Gate') {
       steps {
         timeout(time: 5, unit: 'MINUTES') {
