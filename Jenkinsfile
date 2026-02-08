@@ -1,15 +1,32 @@
 pipeline {
   agent any
 
+  environment {
+    REGISTRY_IMAGE = 'meu-bolso-api'
+    SONAR_PROJECT_KEY = 'meu-bolso-api'
+    SONAR_HOST_URL = 'http://sonarqube:9000'
+  }
+
   stages {
-    stage('1. Build') {
+    stage('Checkout') {
+      steps {
+        checkout scm
+      }
+    }
+
+    stage('Install') {
       steps {
         sh 'npm ci'
+      }
+    }
+
+    stage('Build') {
+      steps {
         sh 'npm run build'
       }
     }
 
-    stage('2. Test & Coverage') {
+    stage('Tests & Coverage') {
       steps {
         sh 'npm run test:cov'
       }
@@ -22,135 +39,81 @@ pipeline {
       steps {
         withSonarQubeEnv('SonarQube') {
           sh '''
-            npx sonar-scanner \
-              -Dsonar.projectKey=meu-bolso-api \
-              -Dsonar.sources=src \
-              -Dsonar.tests=src,test \
-              -Dsonar.test.inclusions="src/**/*.spec.ts,test/**/*.e2e-spec.ts" \
-              -Dsonar.exclusions="src/**/*.spec.ts,src/main.ts,src/migrations/*.ts,src/**/*.dto.ts,src/**/*.entity.ts,src/**/*.module.ts,coverage/**" \
-              -Dsonar.javascript.lcov.reportPaths=coverage/lcov.info \
-              -Dsonar.host.url=http://sonarqube:9000 \
-              -Dsonar.login=$SONAR_TOKEN
-          '''
+        npx sonar-scanner \
+          -Dsonar.projectKey=meu-bolso-api \
+          -Dsonar.sources=src \
+          -Dsonar.tests=src,test \
+          -Dsonar.test.inclusions="src/**/*.spec.ts,test/**/*.e2e-spec.ts" \
+          -Dsonar.exclusions="src/**/*.spec.ts,src/main.ts,src/migrations/*.ts,src/**/*.dto.ts,src/**/*.entity.ts,src/**/*.module.ts,src/coverage/**/*" \
+          -Dsonar.javascript.lcov.reportPaths=coverage/lcov.info \
+          -Dsonar.host.url=http://sonarqube:9000 \
+          -Dsonar.login=$SONAR_TOKEN
+      '''
         }
       }
     }
 
-    stage('4. Quality Gate') {
+    stage('Quality Gate') {
       steps {
         timeout(time: 5, unit: 'MINUTES') {
           waitForQualityGate abortPipeline: true
         }
       }
     }
+
+    stage('Trivy Repo Scan') {
+      steps {
+        sh '''
+          trivy fs \
+            --severity HIGH,CRITICAL \
+            --exit-code 1 \
+            --cache-dir /var/jenkins_home/trivy_cache \
+            --skip-version-check \
+            --scanners vuln \
+            .
+        '''
+      }
+    }
+
+    stage('Docker Build') {
+      steps {
+        sh '''
+          docker build --no-cache -t $REGISTRY_IMAGE:${GIT_COMMIT} .
+        '''
+      }
+    }
+
+    stage('Trivy Image Scan') {
+      steps {
+        sh '''
+          # Vulnerabilidades ignoradas temporariamente via .trivyignore
+          # Motivo: Versões seguras já estão no package.json, mas persistem em
+          # dependências transitivas que estão sendo tratadas via overrides.
+          trivy image --severity HIGH,CRITICAL --exit-code 1 \
+            $REGISTRY_IMAGE:${GIT_COMMIT}
+        '''
+      }
+    }
+
+    stage('Create Git Tag') {
+      when {
+        anyOf {
+            branch 'main'
+            branch 'configArt'
+        }
+      }
+      steps {
+        script {
+            sh 'git config user.email "jenkins@meubolso.com"'
+            sh 'git config user.name "Jenkins CI"'
+            sh 'npm version patch -m "chore(release): %s [skip ci]"'
+            withCredentials([usernamePassword(credentialsId: 'git-credentials',
+                             passwordVariable: 'GIT_PASSWORD',
+                             usernameVariable: 'GIT_USERNAME')]) {
+                              sh "git push https://${GIT_USERNAME}:${GIT_PASSWORD}@github.com/seu-usuario/back-meubolsoapi.git ${env.BRANCH_NAME} --tags"
+                             }
+        }
+      }
+    }
   }
 }
-
-
-// pipeline {
-//   agent any
-
-//   environment {
-//     REGISTRY_IMAGE = "meu-bolso-api"
-//     SONAR_PROJECT_KEY = "meu-bolso-api"
-//     // SONAR_HOST_URL = "http://sonarqube:9000"
-//     SONAR_HOST_URL = "http://localhost:9000"
-//   }
-
-//   stages {
-
-//     stage('Checkout') {
-//       steps {
-//         checkout scm
-//       }
-//     }
-
-//     stage('Install') {
-//       steps {
-//         sh 'npm ci'
-//       }
-//     }
-
-//     stage('Build') {
-//       steps {
-//         sh 'npm run build'
-//       }
-//     }
-
-//     stage('Tests & Coverage') {
-//       steps {
-//         sh 'npm run test:cov'
-//       }
-//     }
-
-//     stage('SonarQube Scan') {
-//   environment {
-//     SONAR_TOKEN = credentials('sonar-token')
-//   }
-//   steps {
-//     sh '''
-//       npx sonar-scanner \
-//         -Dsonar.projectKey=meu-bolso-api \
-//         -Dsonar.sources=src \
-//         -Dsonar.tests=src \
-//         -Dsonar.javascript.lcov.reportPaths=coverage/lcov.info \
-//         -Dsonar.host.url=http://localhost:9000 \
-//         -Dsonar.login=$SONAR_TOKEN
-//     '''
-//   }
-// }
-
-
-//     stage('Quality Gate') {
-//       steps {
-//         timeout(time: 5, unit: 'MINUTES') {
-//           waitForQualityGate abortPipeline: true
-//         }
-//       }
-//     }
-
-//     stage('Trivy Repo Scan') {
-//       steps {
-//         sh '''
-//           trivy fs --severity HIGH,CRITICAL --exit-code 1 .
-//         '''
-//       }
-//     }
-
-//     stage('Docker Build') {
-//       steps {
-//         sh '''
-//           docker build -t $REGISTRY_IMAGE:${GIT_COMMIT} .
-//         '''
-//       }
-//     }
-
-//     stage('Trivy Image Scan') {
-//       steps {
-//         sh '''
-//           trivy image --severity HIGH,CRITICAL --exit-code 1 \
-//             $REGISTRY_IMAGE:${GIT_COMMIT}
-//         '''
-//       }
-//     }
-
-//     stage('Create Git Tag') {
-//       when {
-//         allOf {
-//           branch 'main'
-//           not { changeRequest() }
-//         }
-//       }
-//       steps {
-//         sh '''
-//           git config user.name "jenkins"
-//           git config user.email "jenkins@local"
-
-//           TAG="v$(date +%Y%m%d%H%M%S)"
-//           git tag $TAG
-//           git push origin $TAG
-//         '''
-//       }
-//     }
-//   }
-// }

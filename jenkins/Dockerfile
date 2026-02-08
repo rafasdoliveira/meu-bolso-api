@@ -33,3 +33,7 @@ RUN apt-get update \
  && rm -rf /var/lib/apt/lists/*
 
 USER jenkins
+
+USER root
+RUN apt-get update && apt-get install -y docker.io
+USER jenkins
