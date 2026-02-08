@@ -25,7 +25,8 @@ pipeline {
               -Dsonar.tests=src,test \
               -Dsonar.test.inclusions="src/**/*.spec.ts,test/**/*.e2e-spec.ts" \
               -Dsonar.exclusions="**/dist/**,**/node_modules/**,coverage/**" \
-              -Dsonar.javascript.lcov.reportPaths=coverage/lcov.info
+              -Dsonar.javascript.lcov.reportPaths=coverage/lcov.info \
+              -Dsonar.typescript.tsconfigPath=tsconfig.sonar.json
           '''
         }
       }
