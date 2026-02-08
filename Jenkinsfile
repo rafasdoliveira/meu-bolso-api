@@ -105,6 +105,7 @@ pipeline {
       steps {
         script {
             echo "Tentando push na branch: ${env.BRANCH_NAME}"
+            sh "git checkout ${env.BRANCH_NAME} || git checkout -b ${env.BRANCH_NAME}"
             sh 'git config user.email "jenkins@meubolso.com"'
             sh 'git config user.name "Jenkins CI"'
             sh 'npm version patch -m "chore(release): %s [skip ci]"'
