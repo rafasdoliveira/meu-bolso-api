@@ -2,7 +2,7 @@ pipeline {
   agent any
 
   environment {
-    REGISTRY_IMAGE = 'meu-bolso-api'
+    REGISTRY_IMAGE = 'rafasdoliveira/meu-bolso-api'
     SONAR_PROJECT_KEY = 'meu-bolso-api'
     SONAR_HOST_URL = 'http://sonarqube:9000'
   }
@@ -35,7 +35,7 @@ pipeline {
 
     stage('SonarQube Scan') {
       environment {
-        SONAR_TOKEN = credentials('sonar-token')
+        SONAR_TOKEN = credentials('SONAR_TOKEN')
       }
       steps {
         withSonarQubeEnv('SONAR_LOCAL') {
@@ -78,9 +78,38 @@ pipeline {
 
     stage('Docker Build') {
       steps {
-        sh '''
-          docker build --no-cache -t $REGISTRY_IMAGE:${GIT_COMMIT} .
-        '''
+        sh "docker build --no-cache -t $REGISTRY_IMAGE:${GIT_COMMIT} ."
+        sh "docker tag $REGISTRY_IMAGE:${GIT_COMMIT} $REGISTRY_IMAGE:dev"
+        sh "docker push $REGISTRY_IMAGE:${GIT_COMMIT}"
+        sh "docker push $REGISTRY_IMAGE:dev"
+      }
+    }
+
+    stage('Promote to STG') {
+      input {
+          message "Deseja promover esta imagem para STAGING?"
+          ok "Promover"
+      }
+      steps {
+        script {
+            sh "docker tag $REGISTRY_IMAGE:${GIT_COMMIT} $REGISTRY_IMAGE:stg"
+            sh "docker push $REGISTRY_IMAGE:stg"
+            echo "Imagem promovida para STAGING com sucesso!"
+        }
+      }
+    }
+
+    stage('Promote to PROD') {
+      input {
+          message "Deseja promover esta imagem para PRODUÇÃO?"
+          ok "Aprovar Release"
+      }
+      steps {
+        script {
+            sh "docker tag $REGISTRY_IMAGE:${GIT_COMMIT} $REGISTRY_IMAGE:prod"
+            sh "docker push $REGISTRY_IMAGE:prod"
+            echo "Imagem promovida para PRODUÇÃO! Pronta para deploy manual."
+        }
       }
     }
 
@@ -105,16 +134,19 @@ pipeline {
       }
       steps {
         script {
-            echo "Tentando push na branch: ${env.BRANCH_NAME}"
-            sh "git checkout ${env.BRANCH_NAME} || git checkout -b ${env.BRANCH_NAME}"
-            sh 'git config user.email "jenkins@meubolso.com"'
-            sh 'git config user.name "Jenkins CI"'
-            sh 'npm version patch -m "chore(release): %s [skip ci]"'
-            withCredentials([usernamePassword(credentialsId: 'git-credentials',
-                             passwordVariable: 'GIT_PASSWORD',
-                             usernameVariable: 'GIT_USERNAME')]) {
-                              sh "git push https://${GIT_USERNAME}:${GIT_PASSWORD}@github.com/rafasdoliveira/meu-bolso-api.git ${env.BRANCH_NAME} --tags"
-                             }
+          def branchName = env.BRANCH_NAME
+          echo "Tentando push na branch: ${branchName}"
+          sh "git checkout ${branchName} && git pull origin ${branchName}"
+          sh 'git config user.email "jenkins@meubolso.com"'
+          sh 'git config user.name "Jenkins CI"'
+          if (branchName == 'main') {
+            sh "npm version patch -m 'chore(release): %s [skip ci]'"
+          } else {
+            sh "npm version prepatch --preid=${branchName} -m 'chore(env-release): %s [skip ci]'"
+          }
+          withCredentials([usernamePassword(credentialsId: 'git-credentials', passwordVariable: 'GIT_PASSWORD', usernameVariable: 'GIT_USERNAME')]) {
+            sh "git push https://${GIT_USERNAME}:${GIT_PASSWORD}@github.com/rafasdoliveira/meu-bolso-api.git ${branchName} --tags --force"
+          }
         }
       }
     }

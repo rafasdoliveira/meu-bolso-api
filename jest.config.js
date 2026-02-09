@@ -1,11 +1,9 @@
+import ts from 'typescript';
+
 /** @type {import('jest').Config} */
 export default {
   preset: 'ts-jest/presets/default-esm',
-  globals: {
-    'ts-jest': {
-      useESM: true,
-    },
-  },
+  globals: {},
   moduleNameMapper: {
     '^(\\.{1,2}/.*)\\.js$': '$1',
   },
@@ -14,7 +12,7 @@ export default {
   testRegex: '.*\\.spec\\.ts$',
 
   transform: {
-    '^.+\\.(t|j)s$': ['ts-jest', { useESM: true }],
+    '^.+\\.(t|j)s$': ['ts-jest', { useESM: true, tsconfig: 'tsconfig.json', diagnostics: true }],
   },
 
   extensionsToTreatAsEsm: ['.ts'],

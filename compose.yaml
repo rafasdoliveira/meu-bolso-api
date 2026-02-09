@@ -13,14 +13,14 @@ services:
     networks:
       - meu-bolso-net
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U rafasdoliveira -d meu-bolso-db"]
+      test: [ "CMD-SHELL", "pg_isready -U rafasdoliveira -d meu-bolso-db" ]
       interval: 5s
       timeout: 5s
       retries: 5
 
   api:
     build: .
-    image: meu-bolso-api:v1.0.0
+    image: rafasdoliveira/meu-bolso-api:prod
     container_name: meu-bolso-api
     ports:
       - "8080:8080"
@@ -30,7 +30,7 @@ services:
       - DB_HOST=db
     depends_on:
       db:
-          condition: service_healthy
+        condition: service_healthy
     networks:
       - meu-bolso-net
 
@@ -43,7 +43,7 @@ services:
       - meu-bolso-net
 
   jenkins:
-    build: 
+    build:
       context: ./jenkins
       dockerfile: Dockerfile
     image: jenkins-custom
