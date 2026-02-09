@@ -38,7 +38,7 @@ pipeline {
         SONAR_TOKEN = credentials('sonar-token')
       }
       steps {
-        withSonarQubeEnv('SonarQube') {
+        withSonarQubeEnv('SONAR_LOCAL') {
           sh '''
         npx sonar-scanner \
           -Dsonar.projectKey=meu-bolso-api \
