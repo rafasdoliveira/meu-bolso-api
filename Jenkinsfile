@@ -78,7 +78,7 @@ pipeline {
 
     stage('Docker Build') {
       steps {
-        sh "docker build --no-cache -t meu-bolso-api:${GIT_COMMIT} -t meu-bolso-api:dev ."
+        sh "docker build --no-cache -t ${REGISTRY_IMAGE}:${GIT_COMMIT} -t ${REGISTRY_IMAGE}:dev ." 
       }
     }
 
@@ -86,9 +86,10 @@ pipeline {
       input { message "Promover para PROD localmente?" }
       steps {
           script {
-              sh "docker tag meu-bolso-api:${GIT_COMMIT} meu-bolso-api:prod"
-              echo "Imagem disponível localmente como 'meu-bolso-api:prod'"
+              sh "docker tag ${REGISTRY_IMAGE}:${GIT_COMMIT} ${REGISTRY_IMAGE}:prod" 
+              echo "Imagem disponível localmente como '${REGISTRY_IMAGE}:prod'"
           }
+      }
     }
 }
 
