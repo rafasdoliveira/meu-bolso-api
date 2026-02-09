@@ -2,7 +2,7 @@ pipeline {
   agent any
 
   environment {
-    REGISTRY_IMAGE = 'meu-bolso-api'
+    REGISTRY_IMAGE = 'rafasdoliveira/meu-bolso-api'
     SONAR_PROJECT_KEY = 'meu-bolso-api'
     SONAR_HOST_URL = 'http://sonarqube:9000'
   }
@@ -78,9 +78,38 @@ pipeline {
 
     stage('Docker Build') {
       steps {
-        sh '''
-          docker build --no-cache -t $REGISTRY_IMAGE:${GIT_COMMIT} .
-        '''
+        sh "docker build --no-cache -t $REGISTRY_IMAGE:${GIT_COMMIT} ."
+        sh "docker tag $REGISTRY_IMAGE:${GIT_COMMIT} $REGISTRY_IMAGE:dev"
+        sh "docker push $REGISTRY_IMAGE:${GIT_COMMIT}"
+        sh "docker push $REGISTRY_IMAGE:dev"
+      }
+    }
+
+    stage('Promote to STG') {
+      input {
+          message "Deseja promover esta imagem para STAGING?"
+          ok "Promover"
+      }
+      steps {
+        script {
+            sh "docker tag $REGISTRY_IMAGE:${GIT_COMMIT} $REGISTRY_IMAGE:stg"
+            sh "docker push $REGISTRY_IMAGE:stg"
+            echo "Imagem promovida para STAGING com sucesso!"
+        }
+      }
+    }
+
+    stage('Promote to PROD') {
+      input {
+          message "Deseja promover esta imagem para PRODUÇÃO?"
+          ok "Aprovar Release"
+      }
+      steps {
+        script {
+            sh "docker tag $REGISTRY_IMAGE:${GIT_COMMIT} $REGISTRY_IMAGE:prod"
+            sh "docker push $REGISTRY_IMAGE:prod"
+            echo "Imagem promovida para PRODUÇÃO! Pronta para deploy manual."
+        }
       }
     }
 
