@@ -85,34 +85,6 @@ pipeline {
       }
     }
 
-    stage('Promote to STG') {
-      input {
-          message "Deseja promover esta imagem para STAGING?"
-          ok "Promover"
-      }
-      steps {
-        script {
-            sh "docker tag $REGISTRY_IMAGE:${GIT_COMMIT} $REGISTRY_IMAGE:stg"
-            sh "docker push $REGISTRY_IMAGE:stg"
-            echo "Imagem promovida para STAGING com sucesso!"
-        }
-      }
-    }
-
-    stage('Promote to PROD') {
-      input {
-          message "Deseja promover esta imagem para PRODUÇÃO?"
-          ok "Aprovar Release"
-      }
-      steps {
-        script {
-            sh "docker tag $REGISTRY_IMAGE:${GIT_COMMIT} $REGISTRY_IMAGE:prod"
-            sh "docker push $REGISTRY_IMAGE:prod"
-            echo "Imagem promovida para PRODUÇÃO! Pronta para deploy manual."
-        }
-      }
-    }
-
     stage('Trivy Image Scan') {
       steps {
         sh '''
