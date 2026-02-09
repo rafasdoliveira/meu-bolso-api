@@ -78,12 +78,19 @@ pipeline {
 
     stage('Docker Build') {
       steps {
-        sh "docker build --no-cache -t $REGISTRY_IMAGE:${GIT_COMMIT} ."
-        sh "docker tag $REGISTRY_IMAGE:${GIT_COMMIT} $REGISTRY_IMAGE:dev"
-        sh "docker push $REGISTRY_IMAGE:${GIT_COMMIT}"
-        sh "docker push $REGISTRY_IMAGE:dev"
+        sh "docker build --no-cache -t meu-bolso-api:${GIT_COMMIT} -t meu-bolso-api:dev ."
       }
     }
+
+    stage('Promote to PROD (Local Only)') {
+      input { message "Promover para PROD localmente?" }
+      steps {
+          script {
+              sh "docker tag meu-bolso-api:${GIT_COMMIT} meu-bolso-api:prod"
+              echo "Imagem disponível localmente como 'meu-bolso-api:prod'"
+          }
+    }
+}
 
     stage('Trivy Image Scan') {
       steps {
