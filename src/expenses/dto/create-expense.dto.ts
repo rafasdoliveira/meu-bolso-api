@@ -1,4 +1,5 @@
 import {
+  IsBoolean,
   IsDateString,
   IsEnum,
   IsInt,
@@ -57,4 +58,16 @@ export class CreateExpenseDto {
     message: 'Status deve ser "pending" ou "paid"',
   })
   status: ExpenseStatus;
+
+  @IsOptional()
+  @IsBoolean({ message: 'O campo Recorrente deve ser verdadeiro ou falso' })
+  is_recurrent?: boolean;
+
+  @IsOptional()
+  @IsDateString({}, { message: 'Data final da recorrência deve ser uma data válida (YYYY-MM-DD)' })
+  recurrence_end_date?: string;
+
+  @IsOptional()
+  @IsDateString({}, { message: 'Data da fatura deve ser uma data válida (YYYY-MM-DD)' })
+  invoice_date?: string;
 }

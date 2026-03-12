@@ -9,4 +9,7 @@ export class ExpenseResponseDto {
   subcategory?: string;
   paymentType: string;
   status: string;
+  is_recurrent: boolean;
+  recurrence_group_id?: string;
+  invoice_date?: string;
 }
