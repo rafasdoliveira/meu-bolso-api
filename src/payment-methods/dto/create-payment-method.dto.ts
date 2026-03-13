@@ -1,10 +1,7 @@
-import { IsEnum, IsInt, IsNotEmpty, IsNumber, IsOptional, IsString, Length, Max, Min } from 'class-validator';
+import { IsEnum, IsInt, IsNotEmpty, IsOptional, IsString, Length, Max, Min } from 'class-validator';
 import { PaymentMethodType } from '../enums/payment-method-type.enum';
 
 export class CreatePaymentMethodDto {
-  @IsNumber({}, { message: 'Informe um user_id válido.' })
-  user_id: number;
-
   @IsString({ message: 'Informe o nome do meio de pagamento.' })
   @IsNotEmpty({ message: 'O nome não pode ser vazio.' })
   name: string;

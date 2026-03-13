@@ -12,23 +12,23 @@ export class PaymentMethodsService {
     private readonly paymentMethodRepository: Repository<PaymentMethod>,
   ) {}
 
-  async findAll(user_id: number): Promise<PaymentMethodResponseDto[]> {
+  async findAll(userId: number): Promise<PaymentMethodResponseDto[]> {
     const methods = await this.paymentMethodRepository.find({
-      where: { user_id: In([user_id, 0]) },
+      where: { user_id: In([userId, 0]) },
       order: { name: 'ASC' },
     });
 
     return methods.map((m) => this.toResponse(m));
   }
 
-  async create(dto: CreatePaymentMethodDto): Promise<PaymentMethodResponseDto> {
-    const method = this.paymentMethodRepository.create(dto);
+  async create(userId: number, dto: CreatePaymentMethodDto): Promise<PaymentMethodResponseDto> {
+    const method = this.paymentMethodRepository.create({ ...dto, user_id: userId });
     const saved = await this.paymentMethodRepository.save(method);
     return this.toResponse(saved);
   }
 
-  async update(id: number, dto: Partial<CreatePaymentMethodDto>): Promise<PaymentMethodResponseDto> {
-    const method = await this.paymentMethodRepository.findOne({ where: { id } });
+  async update(userId: number, id: number, dto: Partial<CreatePaymentMethodDto>): Promise<PaymentMethodResponseDto> {
+    const method = await this.paymentMethodRepository.findOne({ where: { id, user_id: userId } });
     if (!method) throw new NotFoundException('Meio de pagamento não encontrado.');
 
     Object.assign(method, dto);
@@ -36,8 +36,8 @@ export class PaymentMethodsService {
     return this.toResponse(saved);
   }
 
-  async remove(id: number): Promise<void> {
-    const method = await this.paymentMethodRepository.findOne({ where: { id } });
+  async remove(userId: number, id: number): Promise<void> {
+    const method = await this.paymentMethodRepository.findOne({ where: { id, user_id: userId } });
     if (!method) throw new NotFoundException('Meio de pagamento não encontrado.');
     if (method.is_protected) throw new BadRequestException('Este meio de pagamento não pode ser excluído.');
     await this.paymentMethodRepository.remove(method);

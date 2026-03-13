@@ -29,6 +29,7 @@ export class ExpensesService {
   ) {}
 
   async findAllPaginated(
+    userId: number,
     page = 1,
     size = 10,
     year?: number,
@@ -42,7 +43,7 @@ export class ExpensesService {
     const validPage = Math.max(page, 1);
     const validSize = Math.max(size, 1);
 
-    const where: any = {};
+    const where: any = { user_id: userId };
 
     if (invoice_month) {
       const iy = invoice_year ?? now.getFullYear();
@@ -94,7 +95,7 @@ export class ExpensesService {
     };
   }
 
-  async createExpense(dto: CreateExpenseDto): Promise<Expense[]> {
+  async createExpense(userId: number, dto: CreateExpenseDto): Promise<Expense[]> {
     const [year, month, day] = dto.date.split('-').map(Number);
     const baseDate = new Date(year, month - 1, day);
 
@@ -127,7 +128,7 @@ export class ExpensesService {
         if (recurrentDate > endDate) break;
         expenses.push(
           this.expenseRepository.create({
-            user_id: dto.user_id,
+            user_id: userId,
             date: recurrentDate,
             description: dto.description,
             amount: dto.amount,
@@ -146,7 +147,7 @@ export class ExpensesService {
       }
 
       const saved = await this.expenseRepository.save(expenses);
-      if (paymentMethod) await this.syncInvoices(dto.user_id, paymentMethod, saved);
+      if (paymentMethod) await this.syncInvoices(userId, paymentMethod, saved);
       return this.expenseRepository.find({
         where: saved.map((e) => ({ id: e.id })),
         relations: EXPENSE_RELATIONS,
@@ -156,7 +157,7 @@ export class ExpensesService {
 
     if (!hasInstallments) {
       const expense = this.expenseRepository.create({
-        user_id: dto.user_id,
+        user_id: userId,
         date: baseDate,
         description: dto.description,
         amount: dto.amount,
@@ -171,7 +172,7 @@ export class ExpensesService {
       });
 
       const saved = await this.expenseRepository.save(expense);
-      if (paymentMethod) await this.syncInvoices(dto.user_id, paymentMethod, [saved]);
+      if (paymentMethod) await this.syncInvoices(userId, paymentMethod, [saved]);
 
       return this.expenseRepository.find({
         where: { id: saved.id },
@@ -193,7 +194,7 @@ export class ExpensesService {
 
       expenses.push(
         this.expenseRepository.create({
-          user_id: dto.user_id,
+          user_id: userId,
           date: installmentDate,
           description: dto.description,
           amount: dto.amount,
@@ -210,7 +211,7 @@ export class ExpensesService {
     }
 
     const saved = await this.expenseRepository.save(expenses);
-    if (paymentMethod) await this.syncInvoices(dto.user_id, paymentMethod, saved);
+    if (paymentMethod) await this.syncInvoices(userId, paymentMethod, saved);
 
     return this.expenseRepository.find({
       where: saved.map((e) => ({ id: e.id })),
@@ -230,9 +231,9 @@ export class ExpensesService {
     }
   }
 
-  async updateExpense(id: number, dto: UpdateExpenseDto, updateAll = false): Promise<Expense> {
+  async updateExpense(userId: number, id: number, dto: UpdateExpenseDto, updateAll = false): Promise<Expense> {
     const expense = await this.expenseRepository.findOne({
-      where: { id },
+      where: { id, user_id: userId },
       relations: EXPENSE_RELATIONS,
     });
 
@@ -243,7 +244,7 @@ export class ExpensesService {
     if (updateAll && expense.installment_total) {
       const siblings = await this.expenseRepository.find({
         where: {
-          user_id: expense.user_id,
+          user_id: userId,
           description: expense.description,
           installment_total: expense.installment_total,
         },
@@ -280,13 +281,13 @@ export class ExpensesService {
     }
 
     return this.expenseRepository.findOneOrFail({
-      where: { id },
+      where: { id, user_id: userId },
       relations: EXPENSE_RELATIONS,
     });
   }
 
-  async updateStatus(id: number, status: ExpenseStatus): Promise<{ id: number; status: ExpenseStatus }> {
-    const expense = await this.expenseRepository.findOne({ where: { id } });
+  async updateStatus(userId: number, id: number, status: ExpenseStatus): Promise<{ id: number; status: ExpenseStatus }> {
+    const expense = await this.expenseRepository.findOne({ where: { id, user_id: userId } });
 
     if (!expense) {
       throw new NotFoundException(`Despesa #${id} não encontrada`);
@@ -298,11 +299,8 @@ export class ExpensesService {
     return { id, status };
   }
 
-  async deleteExpense(
-    id: number,
-    deleteAll: boolean,
-  ): Promise<{ deleted: number }> {
-    const expense = await this.expenseRepository.findOne({ where: { id } });
+  async deleteExpense(userId: number, id: number, deleteAll: boolean): Promise<{ deleted: number }> {
+    const expense = await this.expenseRepository.findOne({ where: { id, user_id: userId } });
 
     if (!expense) {
       throw new NotFoundException(`Despesa #${id} não encontrada`);
@@ -328,7 +326,7 @@ export class ExpensesService {
     if (expense.installment_total) {
       const siblings = await this.expenseRepository.find({
         where: {
-          user_id: expense.user_id,
+          user_id: userId,
           description: expense.description,
           installment_total: expense.installment_total,
         },

@@ -11,9 +11,6 @@ import {
 import { ExpenseStatus } from '../entities/expense.entity';
 
 export class CreateExpenseDto {
-  @IsInt({ message: 'O campo Usuário é obrigatório e deve ser um número' })
-  user_id: number;
-
   @IsDateString(
     {},
     {
